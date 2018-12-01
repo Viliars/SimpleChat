@@ -27,6 +27,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         SEND_MSG = 2
         GET_FROMTS = 3
         SEND_QUEST = 4
+        GET_NEWID = 5
 
     def Process_USER_INIT(self):
         global messages
@@ -40,7 +41,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
 
 
-	def Process_User_Predict(self):
+	def Process_SEND_QUEST(self):
         global messages
         global timestamp
         pubksize = 256
@@ -54,7 +55,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         ID_from = int.from_bytes(got, byteorder='big')
         
         # CreateUser with ID_from
-        self.ml.upd_user(ID_from, [1, 0, 0, 0, 0, 0, 0])
+        #self.ml.upd_user(ID_from, [1, 0, 0, 0, 0, 0, 0])
         
         
         ans, val = 0, 0
@@ -73,9 +74,10 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         val = int.from_bytes(got, byteorder='big')
         
         self.ml.set_user(ID_from, ans, val)
+        self.request.sendall(b'\x01\x11Request Accepted\x00')
         
         
-    def Process_Get_User(self):
+    def Process_GET_NEWID(self):
 		global messages
         global timestamp
         pubksize = 256
@@ -91,6 +93,9 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         ID_from = int.from_bytes(got, byteorder='big')
         
         Near_User = self.ml.get_near(ID_from, 1)
+        self.request.sendall(b'\x01')
+        self.request.sendall(Near_User.to_bytes(pubksize, byteorder='big'))
+
         
         
 
@@ -192,6 +197,12 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             if req_type is self.RequestType.GET_FROMTS:
                 self.Process_GET_FROMTS()
             
+            if req_type is self.RequestType.SEND_QUEST:
+                self.Process_SEND_QUEST()
+            
+            if req_type is self.RequestType.GET_NEWID:
+                self.Process_GET_NEWID()
+            
 
         except (ServerException,
                 socket.timeout,
@@ -202,7 +213,8 @@ if __name__ == "__main__":
     HOST, PORT = "176.99.11.61", 13013
 
     # Create the server, binding to localhost on port 9999
-    with socketserver.TCPServer((HOST, PORT), MyTCPHandler) as server:
+    server = socketserver.TCPServer((HOST, PORT), MyTCPHandler)
+    #with socketserver.TCPServer((HOST, PORT), MyTCPHandler) as server:
         # Activate the server; this will keep running until you
         # interrupt the program with Ctrl-C
-        server.serve_forever()
+    server.serve_forever()
