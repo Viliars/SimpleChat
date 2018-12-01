@@ -27,7 +27,9 @@ if __name__ == "__main__":
     HOST, PORT = "176.99.11.61", 13013
 
     # Create the server, binding to localhost on port 9999
-    with socketserver.TCPServer((HOST, PORT), MyTCPHandler) as server:
+    server = socketserver.TCPServer((HOST, PORT), MyTCPHandler)
+    server.serve_forever()
+    #with socketserver.TCPServer((HOST, PORT), MyTCPHandler) as server:
         # Activate the server; this will keep running until you
         # interrupt the program with Ctrl-C
-        server.serve_forever()
+        #server.serve_forever()
