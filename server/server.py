@@ -30,15 +30,22 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
         try:
             self.request.settimeout(5)
-            bo = 'big' if int.from_bytes(self.request.recv(4), byteorder='big') == 1 else 'little'
-            req_type_int = int.from_bytes(self.request.recv(4), byteorder=bo)
+            request.setsockopt(socket.MSG_WAITALL, socket.MSG_WAITALL, 1)
+            got = self.request.recv(4)
+            if len(got) < 4:
+                raise ServerException('Not enough bytes got')
+            bo = 'big' if int.from_bytes(got, byteorder='big') == 1 else 'little'
+            got = self.request.recv(4)
+            if len(got) < 4:
+                raise ServerException('Not enough bytes got')
+            req_type_int = int.from_bytes(got, byteorder=bo)
             try:
                 req_type = self.RequestType(req_type_int)
             except ValueError:
-                self.request.sendall('\x00\x10Bad RequestType\x00')
+                self.request.sendall(b'\x00\x10Bad RequestType\x00')
                 raise ServerException('Bad RequestType')
             if req_type is self.RequestType.NO_REQ:
-                self.request.sendall('\x01\x11Request Accepted\x00')
+                self.request.sendall(b'\x01\x11Request Accepted\x00')
                 return
             if req_type is self.RequestType.USER_INIT:
                 self.Process_USER_INIT(bo)
@@ -70,6 +77,7 @@ if __name__ == "__main__":
         server_thread.start()
         print("Server loop running in thread:", server_thread.name)
         
+        a = 'str\n'
         input(a)
 
         server.shutdown()
