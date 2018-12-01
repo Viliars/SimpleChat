@@ -41,7 +41,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
 
 
-	def Process_SEND_QUEST(self):
+    def Process_SEND_QUEST(self):
         global messages
         global timestamp
         pubksize = 256
@@ -78,7 +78,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         
         
     def Process_GET_NEWID(self):
-		global messages
+        global messages
         global timestamp
         pubksize = 256
         
