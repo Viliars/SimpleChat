@@ -24,19 +24,13 @@ class UserPredict():
         self.clf.fit(self.Users)
         
     def deonline(self, userIDs):
-        if len(userIDs) > 1:
-            for every in userIDs:
-                self.Users.loc[every]['online'] = 0
-        else:
-            self.Users.loc[userIDs]['online'] = 0
+        for every in userIDs:
+            self.Users.loc[every]['online'] = 0
     
         self.clf.fit(self.Users)
     
     def online(self, userIDs):
-        if len(userIDs) > 1:
-            for every in userIDs:
-                self.Users.loc[every]['online'] = 1
-        else:
-            self.Users.loc[userIDs]['online'] = 1
+        for every in userIDs:
+            self.Users.loc[every]['online'] = 1
             
         self.clf.fit(self.Users)
