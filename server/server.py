@@ -6,6 +6,7 @@ from enum import Enum
 
 messages = {}
 timestamp = 0
+myml = ml.UserPredict()
 
 class ServerException(Exception):
     pass
@@ -17,7 +18,6 @@ class Message():
         self.ID_to = ID_to
         self.message = message
         self.ts = ts
-        self.ml = ml.UserPredict()
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
 
@@ -44,6 +44,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def Process_SEND_QUEST(self):
         global messages
         global timestamp
+        global myml
         pubksize = 256
         got = self.request.recv(pubksize)
         
@@ -73,13 +74,14 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             raise ServerException('Not enough bytes got')
         val = int.from_bytes(got, byteorder='big')
         
-        self.ml.set_user(ID_from, ans, val)
+        myml.set_user(ID_from, ans, val)
         self.request.sendall(b'\x01\x11Request Accepted\x00')
         
         
     def Process_GET_NEWID(self):
         global messages
         global timestamp
+        global myml
         pubksize = 256
         
         
@@ -92,7 +94,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             raise ServerException('Not enough bytes got')
         ID_from = int.from_bytes(got, byteorder='big')
         
-        Near_User = self.ml.get_near(ID_from, 1)
+        Near_User = myml.get_near(ID_from, 1)
         self.request.sendall(b'\x01')
         self.request.sendall(Near_User.to_bytes(pubksize, byteorder='big'))
 
