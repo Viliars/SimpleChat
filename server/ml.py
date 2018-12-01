@@ -19,7 +19,11 @@ class UserPredict():
         self.clf.fit(self.Users)
     
     def set_user(self, userID, column, value):
-		self.Users.loc[userID][column] = value
+		try:
+			self.Users.loc[userID][column] = value
+		except Exception as e:
+			self.Users.loc[userID] = [1, 0, 0, 0, 0, 0, 0]
+			self.Users.loc[userID][column] = value
 		self.clf.fit(self.Users)
 
     def add_users(self, userIDs, data):
