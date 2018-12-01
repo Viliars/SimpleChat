@@ -31,12 +31,15 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
     def Process_USER_INIT(self):
         global messages
+        global myml
         pubksize = 256
         got = self.request.recv(pubksize)
         if len(got) < pubksize:
             self.request.sendall(b'\x00\x0EBad PubK Size\x00')
             raise ServerException('Not enough bytes got')
-        messages[int.from_bytes(got, byteorder='big')] = []
+        ID = int.from_bytes(got, byteorder='big')
+        messages[ID] = []
+        myml.add_user(ID, [1, 0, 0, 0, 0, 0, 0])
         self.request.sendall(b'\x01\x11Request Accepted\x00')
 
 
