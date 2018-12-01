@@ -30,7 +30,6 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
         try:
             self.request.settimeout(5)
-            request.setsockopt(socket.MSG_WAITALL, socket.MSG_WAITALL, 1)
             got = self.request.recv(4)
             if len(got) < 4:
                 raise ServerException('Not enough bytes got')
