@@ -1,6 +1,7 @@
 import socket
 import threading
 import socketserver
+#import ml
 from enum import Enum
 
 class ServerException(Exception):
@@ -15,16 +16,16 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         GET_FROMTS = 3
         SEND_QUEST = 4
 
-    def Process_USER_INIT(self, bo):
+    def Process_USER_INIT(self):
         pass
 
-    def Process_SEND_MSG(self, bo):
+    def Process_SEND_MSG(self):
         pass
 
-    def Process_GET_FROMTS(self, bo):
+    def Process_GET_FROMTS(self):
         pass
 
-    def Process_SEND_QUEST(self, bo):
+    def Process_SEND_QUEST(self):
         pass        
 
     def handle(self):
@@ -33,11 +34,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
             got = self.request.recv(4)
             if len(got) < 4:
                 raise ServerException('Not enough bytes got')
-            bo = 'big' if int.from_bytes(got, byteorder='big') == 1 else 'little'
-            got = self.request.recv(4)
-            if len(got) < 4:
-                raise ServerException('Not enough bytes got')
-            req_type_int = int.from_bytes(got, byteorder=bo)
+            req_type_int = int.from_bytes(got, byteorder='big')
             try:
                 req_type = self.RequestType(req_type_int)
             except ValueError:
@@ -47,14 +44,15 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
                 self.request.sendall(b'\x01\x11Request Accepted\x00')
                 return
             if req_type is self.RequestType.USER_INIT:
-                self.Process_USER_INIT(bo)
+                self.Process_USER_INIT()
 
             # data = str(self.request.recv(1024), 'ascii')
             #cur_thread = threading.current_thread()
             #response = bytes("{}: {}".format(cur_thread.name, data), 'ascii')
             #self.request.sendall(response)
         except (ServerException,
-                socket.timeout) as e:
+                socket.timeout,
+                OSError) as e:
             print(e)
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
