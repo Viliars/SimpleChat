@@ -4,7 +4,7 @@ from sklearn.neighbors import NearestNeighbors as NN
 class UserPredict():
     def __init__(self, algorithm='brute'):
         self.Users = pd.DataFrame(columns=['online', 0, 1, 2, 3, 4])
-        self.clf = NN(algorithm=algorithm)
+        self.clf = NN(algorithm=algorithm, metric='hamming')
 
     def get_nears(self, userIDs, n):
         bufer = [self.Users.loc[x] for x in userIDs]
