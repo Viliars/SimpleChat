@@ -1,7 +1,7 @@
 import socket
 import threading
 import socketserver
-#import ml
+import ml
 from enum import Enum
 
 messages = {}
@@ -17,6 +17,7 @@ class Message():
         self.ID_to = ID_to
         self.message = message
         self.ts = ts
+        self.ml = ml.UserPredict()
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
 
@@ -36,6 +37,62 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             raise ServerException('Not enough bytes got')
         messages[int.from_bytes(got, byteorder='big')] = []
         self.request.sendall(b'\x01\x11Request Accepted\x00')
+
+
+
+	def Process_User_Predict(self):
+        global messages
+        global timestamp
+        pubksize = 256
+        got = self.request.recv(pubksize)
+        
+        
+        # get userID
+        if len(got) < pubksize:
+            self.request.sendall(b'\x00\x0EBad PubK1Size\x00')
+            raise ServerException('Not enough bytes got')
+        ID_from = int.from_bytes(got, byteorder='big')
+        
+        # CreateUser with ID_from
+        self.ml.upd_user(ID_from, [1, 0, 0, 0, 0, 0, 0])
+        
+        
+        ans, val = 0, 0
+        # get number of quest
+        got = self.request.recv(4)
+        if len(got) < 4:
+            self.request.sendall(b'\x00\x0EBad LengtSize\x00')
+            raise ServerException('Not enough bytes got')
+        ans = int.from_bytes(got, byteorder='big')
+        
+        # get value of quest ( answer )
+        got = self.request.recv(4)
+        if len(got) < 4:
+            self.request.sendall(b'\x00\x0EBad LengtSize\x00')
+            raise ServerException('Not enough bytes got')
+        val = int.from_bytes(got, byteorder='big')
+        
+        self.ml.set_user(ID_from, ans, val)
+        
+        
+    def Process_Get_User(self):
+		global messages
+        global timestamp
+        pubksize = 256
+        
+        
+        got = self.request.recv(pubksize)
+        
+        
+        # get userID
+        if len(got) < pubksize:
+            self.request.sendall(b'\x00\x0EBad PubK1Size\x00')
+            raise ServerException('Not enough bytes got')
+        ID_from = int.from_bytes(got, byteorder='big')
+        
+        Near_User = self.ml.get_near(ID_from, 1)
+        
+        
 
     def Process_SEND_MSG(self):
         global messages
