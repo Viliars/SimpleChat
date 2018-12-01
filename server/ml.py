@@ -10,8 +10,8 @@ class UserPredict():
         bufer = [self.Users.loc[x] for x in userIDs]
         return self.Users.index[self.clf.kneighbors(bufer, n, return_distance=False)].values
     
-	def get_near(self, userID, n):
-		return self.Users.index[self.clf.kneighbors([self.Users.loc[userID]],
+    def get_near(self, userID, n):
+        return self.Users.index[self.clf.kneighbors([self.Users.loc[userID]],
                                                     n+1, return_distance=False)].values[0][1:]
     
     def add_user(self, userID, data):
@@ -19,12 +19,12 @@ class UserPredict():
         self.clf.fit(self.Users)
     
     def set_user(self, userID, column, value):
-		try:
-			self.Users.loc[userID][column] = value
-		except Exception as e:
-			self.Users.loc[userID] = [1, 0, 0, 0, 0, 0, 0]
-			self.Users.loc[userID][column] = value
-		self.clf.fit(self.Users)
+        try:
+            self.Users.loc[userID][column] = value
+        except Exception as e:
+            self.Users.loc[userID] = [1, 0, 0, 0, 0, 0, 0]
+            self.Users.loc[userID][column] = value
+        self.clf.fit(self.Users)
 
     def add_users(self, userIDs, data):
         for i, every in enumerate(userIDs):
