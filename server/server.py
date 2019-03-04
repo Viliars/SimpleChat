@@ -99,7 +99,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         
         Near_User = myml.get_near(ID_from, 1)
         self.request.sendall(b'\x01')
-        self.request.sendall(Near_User.to_bytes(pubksize, byteorder='big'))
+        self.request.sendall(Near_User[0].to_bytes(pubksize, byteorder='big'))
 
         
         
